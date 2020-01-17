@@ -1,0 +1,88 @@
+File modified : /etc/network/interfaces :
+# cat /etc/network/interfaces
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+allow-hotplug enp0s3
+iface enp0s3 inet static
+        address 10.0.2.15
+        netmask 255.255.255.252
+        gateway 10.0.2.2
+        nameserver      10.51.1.42
+        nameserver      10.51.1.43
+
+---------
+ Other File modified /etc/network/interface.d/enp0s3 :
+
+ #cat /etc/network/interfaces.d/enp0s3
+iface enp0s3 inet static
+        address 10.0.2.15
+        netmask 255.255.255.252
+        gateway 10.0.2.2
+
+#Creation du fichier firewall dant /etc/init.d/firewall parfeu : iptables
+#Protection contre les scans avec portsentry dans /etc/init.d/portsentry
+
+Services used : portentry(anti-scan) ; ssh
+Dans /etc/portsentry/portsentry.ignore.static est defini l'ip de notre ordi pour lui permettre l'acces
+
+Firewall : iptables
+Anti DoS : fail2ban
+Anti-scan ports ouverts : portsentry
+
+Modif des fichiers : interfaces.d/enp0s3 et interfaces
+
+Scripts 1 : crontab 162475 Bat B 3eme
+qui execute /etc/uptodate.sh :
+#!/bin/bash
+
+sudo /usr/bin/apt update -y
+sudo /usr/bin/apt full-upgrade -y
+
+exit 0
+
+Script 2 : watch.sh
+
+Installed : exim4 && mutt
+
+Envoie de mail si modification du fichier
+updates/watching.sh :
+
+#!/bin/bash
+
+host=$(hostname)
+
+file_name="/etc/crontab"
+
+previous_mod_file="/home/alanteri/updates/previous_modif.txt"
+
+last_modif=$(date -r ${file_name} '+%d/%m/%Y %H:%M')
+
+mail_address="root@${host}"
+
+if [ -f ${previous_mod_file} ]
+then
+else
+        touch ${previous_mod_file};
+fi
+
+previous_modif='cat ${previous_mod_file}'
+
+if [${last_modif} != ${previous_modif}]; then
+        messg="This mail has been sent to you, to warn you that the ${file_name} has been modified.";
+        subject="Modification of ${file_name} file";
+
+        echo "${messg}" | mail -s "${subject}" "$(mail_address)";
+fi
+
+echo "${last_modif}" > "${previous_mod_file}"
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDbXxDcMSBCg/QeEK+qvXrhwmrAxVfiJujVlwv3h202gS/YrQLRLZiIJGKE1b9P8xsDagv1su7Ck7RFc4oCNYVkVIRzcwRa3MgCaGbPIerB5vwqrB9rCbq3UHTfw90FRsWTNb7yQqGewpx/XzAUHN/9fP0WD3kEYJz9oXa9/gVMFl1T5bQHtV5gWXl7rP0dahIR0e4NYylKm8CUA1XjG7eBEaLKX+iRK2Gy2rv4ILNPW3wMy3GR+J/v0raxcA0EbpvcPnq/1dv2J3n8s6/WrwslZUT43Yzn6lr1J6JDdPHJRp46w8JKHZPMHz5wRJoszpA/pXKjrTN5wQtGLAQ54Fvh alanteri@e2r1p8.42.fr
+
